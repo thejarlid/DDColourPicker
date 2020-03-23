@@ -8,7 +8,7 @@
 //  A view which presents various sections and colours
 //  that can be picked and associated to each category.
 //  The user can select the section and then pick the colour
-//  which they would like to associate.
+//  which they would like to associate a colour to.
 //
 //    MIT License
 //
