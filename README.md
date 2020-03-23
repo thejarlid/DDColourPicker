@@ -70,7 +70,7 @@ Feel free to extend this control, use it for your project, and suggest any impro
 
 MIT License
 
-Copyright (c) 2017 Dilraj Devgun
+Copyright (c) 2020 Dilraj Devgun
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
