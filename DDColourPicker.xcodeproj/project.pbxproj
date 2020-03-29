@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B4287D4824286F5000CF72A8 /* DDColourBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4287D4724286F5000CF72A8 /* DDColourBubble.swift */; };
 		B42F67BA2425C1DD00AAE9EF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F67B92425C1DD00AAE9EF /* AppDelegate.swift */; };
 		B42F67BC2425C1DD00AAE9EF /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F67BB2425C1DD00AAE9EF /* SceneDelegate.swift */; };
 		B42F67BE2425C1DD00AAE9EF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F67BD2425C1DD00AAE9EF /* ViewController.swift */; };
@@ -37,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B4287D4724286F5000CF72A8 /* DDColourBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDColourBubble.swift; sourceTree = "<group>"; };
 		B42F67B62425C1DD00AAE9EF /* DDColourPicker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DDColourPicker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B42F67B92425C1DD00AAE9EF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B42F67BB2425C1DD00AAE9EF /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 				B42F67BB2425C1DD00AAE9EF /* SceneDelegate.swift */,
 				B42F67BD2425C1DD00AAE9EF /* ViewController.swift */,
 				B42F67E92425C3DD00AAE9EF /* DDColourPicker.swift */,
+				B4287D4724286F5000CF72A8 /* DDColourBubble.swift */,
 				B42F67EB2426DA2D00AAE9EF /* DDColourPickerHeaderSection.swift */,
 				B42F67BF2425C1DD00AAE9EF /* Main.storyboard */,
 				B42F67C22425C1DE00AAE9EF /* Assets.xcassets */,
@@ -270,6 +273,7 @@
 				B42F67EA2425C3DD00AAE9EF /* DDColourPicker.swift in Sources */,
 				B42F67BA2425C1DD00AAE9EF /* AppDelegate.swift in Sources */,
 				B42F67BC2425C1DD00AAE9EF /* SceneDelegate.swift in Sources */,
+				B4287D4824286F5000CF72A8 /* DDColourBubble.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

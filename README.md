@@ -16,7 +16,7 @@ To add this to your project copy DDColourPicker.swift and DDColourPickerHeaderSe
 
 The data source is the most important part of the view as it provides the means for which the colour is populated in the view.
 The following methods must be implemented:
-```
+```Swift
 /// Returns the number of sections that the colour picker should present
 ///
 /// - Parameter colourPicker: the colour picker associated with this call

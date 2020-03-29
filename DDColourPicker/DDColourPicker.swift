@@ -112,13 +112,19 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
     private var numColoursForCurrentSection:Int = 0                 // number of colours to present for the current section
     private var circleDiameter:CGFloat = 5                          // diameter of circles that will be presented
     private var currentSection = 0                                  // the current section that the colour picker is displaying options for
-    private var selectedCircles:[UIView] = []                       // the currently selected colour/circle for each section
-    private var selectableCircles:[UIView] = []                     // the colours/circles which can be selected for the current section
+    private var selectedCircles:[DDColourBubble] = []               // the currently selected colour/circle for each section
+    private var selectableCircles:[DDColourBubble] = []             // the colours/circles which can be selected for the current section
     private var headerSections:[DDColourPickerHeaderSection] = []   // the header section views for each section in the top header
     private var headerView:UIScrollView!                            // the scroll view which contains the the header content view
     private var headerContentView:UIView!                           // the content view which contains the indvidual section headers that is then placed in the scroll view
     private var headerSelectionRing:UIView!                         // the ring that goes around the circle for the current section colour
     private var initialSetup:Bool = false                           // whether the view has been setup
+    
+    var BPAnimator: UIDynamicAnimator!
+    var BPCollision: UICollisionBehavior!
+    var BPGravity: UIFieldBehavior!
+    var BPDynamics: UIDynamicItemBehavior!
+    var gravPos: CGPoint!
     
     
     override func layoutSubviews() {
@@ -135,6 +141,15 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
     private func setup() {
         if !initialSetup {
             
+            BPAnimator = UIDynamicAnimator(referenceView: self)
+//            BPAnimator.setValue(true, forKey: "debugEnabled") // Private API. See the bridging header.
+            
+            BPGravity = UIFieldBehavior.radialGravityField(position: self.center)
+            BPGravity.falloff = 0.3
+            BPGravity.strength = 3
+            BPGravity.animationSpeed = 7
+            gravPos = self.center
+            
             // clear the current layout
             for view in self.subviews {
                 view.removeFromSuperview()
@@ -148,6 +163,20 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
             // construct the subviews
             constructHeader()
             constructSection(sectionIndex: currentSection, animated: true)
+            
+            
+            
+            BPDynamics = UIDynamicItemBehavior(items: self.selectableCircles);
+            BPDynamics.allowsRotation = false;
+            BPDynamics.resistance = 0.8
+
+            BPCollision = UICollisionBehavior(items: self.selectableCircles)
+            BPCollision.setTranslatesReferenceBoundsIntoBoundary(with: UIEdgeInsets(top: 0, left: -500, bottom: 0, right: -500))
+            BPCollision.collisionMode = .everything
+
+            BPAnimator.addBehavior(BPDynamics)
+            BPAnimator.addBehavior(BPGravity)
+            BPAnimator.addBehavior(BPCollision)
             
             initialSetup = true
         }
@@ -191,10 +220,8 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
             headerContentView.addSubview(sectionView)
             
             // create the circle for the currently selected view so that we can later add it to the view when/if it becomes deselected
-            let circle = UIButton(frame: CGRect(x: 0, y: 0, width: circleDiameter, height: circleDiameter))
+            let circle = DDColourBubble(colour: sectionSelectedColour, diameter: circleDiameter)
             circle.center = self.center
-            circle.layer.cornerRadius = circleDiameter/2
-            circle.backgroundColor = sectionSelectedColour
             circle.alpha = 0
             circle.transform = CGAffineTransform(scaleX: 0, y: 0)
             circle.addTarget(self, action: #selector(self.didPressCircle(sender:)), for: .touchUpInside)
@@ -245,18 +272,18 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
         numColoursForCurrentSection = dataSource?.colourPicker(self, numberOfColoursInSection: sectionIndex) ?? 0
         
         // construct the circles for the current section
-        var newCircles:[UIView] = []
+        var newCircles:[DDColourBubble] = []
         for i in 0 ..< numColoursForCurrentSection {
-            let circle = UIButton(frame: CGRect(x: 0, y: 0, width: circleDiameter, height: circleDiameter))
-            circle.center = self.center
+            let bubbleColour = dataSource?.colourPicker(self, colourForIndexPath: IndexPath(item: i, section: sectionIndex)) ?? UIColor.blue
+            let circle = DDColourBubble(colour: bubbleColour, diameter: circleDiameter)
+            circle.center = CGPoint(x: self.frame.width * CGFloat.random(in: 0...1), y: self.frame.height * CGFloat.random(in: 0...1))
             circle.tag = i
-            circle.layer.cornerRadius = circleDiameter/2
-            circle.backgroundColor = dataSource?.colourPicker(self, colourForIndexPath: IndexPath(item: i, section: sectionIndex)) ?? UIColor.blue
             circle.alpha = animated ? 0 : 1
             circle.transform = animated ? CGAffineTransform(scaleX: 0, y: 0) : CGAffineTransform.identity
             circle.addTarget(self, action: #selector(self.didPressCircle(sender:)), for: .touchUpInside)
 
             // TOOO: need to add phsysics properties to the view and setup the location of the view properly
+            BPGravity.addItem(circle)
             
             newCircles += [circle]
         }
@@ -317,7 +344,7 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
     ///
     /// - Parameter sender: the view which triggered the action
     ///
-    @objc func didPressCircle(sender:UIButton) {
+    @objc func didPressCircle(sender:DDColourBubble) {
         let snapPt = headerSections[currentSection].convert(headerSections[currentSection].getDotPoint(), to: self)
         headerSections[currentSection].fadeDotOut()
         
@@ -349,7 +376,7 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
     ///
     /// - Parameter selected: the selected colour view
     ///
-    private func selectColour(selected:UIView) {
+    private func selectColour(selected:DDColourBubble) {
         // swap circles in selectable to selected
         let previouslySelectedColour = selectedCircles[currentSection]
         previouslySelectedColour.tag = selected.tag
@@ -359,6 +386,9 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
         previouslySelectedColour.center = CGPoint(x: self.frame.width * CGFloat.random(in: 0...1), y: self.frame.height * CGFloat.random(in: 0...1))
         self.addSubview(previouslySelectedColour)
         
+        BPGravity.removeItem(selected)
+        BPGravity.addItem(previouslySelectedColour)
+
         delegate?.colourPicker(self, didSelectColour: selected.backgroundColor!, forSection: currentSection)
     }
     
