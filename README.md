@@ -1,9 +1,10 @@
 # DDColourPicker
 
-DDColourPicker is a lightweight view that provides an interactive way for user's to select a colour and associate it to a given cateogry. It provides colours in circles which float around within the view and then snap to their associated position. The view is design to be incredibly simple to use and add. 
+DDColourPicker is a lightweight view that provides an interactive way for user's to select a colour and associate it to a given cateogry. It provides colours in circles which float around within the view and then snap to their associated position. The view is design to be incredibly simple to use and add in order to have multiple different colours to be selected. 
 
 ## Screenshots
 
+<img src='https://i.imgur.com/E8N2lMC.gif' title='Demo' width='' alt='Demo' />
 
 
 ## Usage 
@@ -61,6 +62,10 @@ func colourPicker(_ colourPicker:DDColourPicker, numberOfColoursInSection sectio
 ///   - indexPath: An index path representing the item index and section number for which a colour is requested
 func colourPicker(_ colourPicker:DDColourPicker, colourForIndexPath indexPath:IndexPath) -> UIColor
 ```
+
+## Credits
+
+The SceneKit portion is modified and adapted from the repository [Magnetic](https://github.com/efremidze/Magnetic) so thank you to Lasha Efremidze for the work there and inspiring this control. 
 
 ## Collaboration
 
