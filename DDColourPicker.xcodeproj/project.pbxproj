@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B4287D4824286F5000CF72A8 /* DDColourBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4287D4724286F5000CF72A8 /* DDColourBubble.swift */; };
 		B42F67BA2425C1DD00AAE9EF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F67B92425C1DD00AAE9EF /* AppDelegate.swift */; };
 		B42F67BC2425C1DD00AAE9EF /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F67BB2425C1DD00AAE9EF /* SceneDelegate.swift */; };
 		B42F67BE2425C1DD00AAE9EF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F67BD2425C1DD00AAE9EF /* ViewController.swift */; };
@@ -18,6 +17,10 @@
 		B42F67DC2425C1DE00AAE9EF /* DDColourPickerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F67DB2425C1DE00AAE9EF /* DDColourPickerUITests.swift */; };
 		B42F67EA2425C3DD00AAE9EF /* DDColourPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F67E92425C3DD00AAE9EF /* DDColourPicker.swift */; };
 		B42F67EC2426DA2D00AAE9EF /* DDColourPickerHeaderSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F67EB2426DA2D00AAE9EF /* DDColourPickerHeaderSection.swift */; };
+		B436569724316BAC005AB55E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B436568F24316BAC005AB55E /* Extensions.swift */; };
+		B47D42B12432B07400381B52 /* DDBubbleNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47D42B02432B07400381B52 /* DDBubbleNode.swift */; };
+		B47D42B32432B57700381B52 /* DDBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47D42B22432B57700381B52 /* DDBubbleView.swift */; };
+		B47D42B52432B5E000381B52 /* DDBubbleScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47D42B42432B5E000381B52 /* DDBubbleScene.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +41,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B4287D4724286F5000CF72A8 /* DDColourBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDColourBubble.swift; sourceTree = "<group>"; };
 		B42F67B62425C1DD00AAE9EF /* DDColourPicker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DDColourPicker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B42F67B92425C1DD00AAE9EF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B42F67BB2425C1DD00AAE9EF /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -55,6 +57,10 @@
 		B42F67DD2425C1DE00AAE9EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B42F67E92425C3DD00AAE9EF /* DDColourPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDColourPicker.swift; sourceTree = "<group>"; };
 		B42F67EB2426DA2D00AAE9EF /* DDColourPickerHeaderSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDColourPickerHeaderSection.swift; sourceTree = "<group>"; };
+		B436568F24316BAC005AB55E /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		B47D42B02432B07400381B52 /* DDBubbleNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDBubbleNode.swift; sourceTree = "<group>"; };
+		B47D42B22432B57700381B52 /* DDBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDBubbleView.swift; sourceTree = "<group>"; };
+		B47D42B42432B5E000381B52 /* DDBubbleScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDBubbleScene.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,8 +115,11 @@
 				B42F67BB2425C1DD00AAE9EF /* SceneDelegate.swift */,
 				B42F67BD2425C1DD00AAE9EF /* ViewController.swift */,
 				B42F67E92425C3DD00AAE9EF /* DDColourPicker.swift */,
-				B4287D4724286F5000CF72A8 /* DDColourBubble.swift */,
 				B42F67EB2426DA2D00AAE9EF /* DDColourPickerHeaderSection.swift */,
+				B436568F24316BAC005AB55E /* Extensions.swift */,
+				B47D42B02432B07400381B52 /* DDBubbleNode.swift */,
+				B47D42B22432B57700381B52 /* DDBubbleView.swift */,
+				B47D42B42432B5E000381B52 /* DDBubbleScene.swift */,
 				B42F67BF2425C1DD00AAE9EF /* Main.storyboard */,
 				B42F67C22425C1DE00AAE9EF /* Assets.xcassets */,
 				B42F67C42425C1DE00AAE9EF /* LaunchScreen.storyboard */,
@@ -268,12 +277,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B47D42B12432B07400381B52 /* DDBubbleNode.swift in Sources */,
 				B42F67EC2426DA2D00AAE9EF /* DDColourPickerHeaderSection.swift in Sources */,
 				B42F67BE2425C1DD00AAE9EF /* ViewController.swift in Sources */,
 				B42F67EA2425C3DD00AAE9EF /* DDColourPicker.swift in Sources */,
+				B436569724316BAC005AB55E /* Extensions.swift in Sources */,
 				B42F67BA2425C1DD00AAE9EF /* AppDelegate.swift in Sources */,
+				B47D42B32432B57700381B52 /* DDBubbleView.swift in Sources */,
+				B47D42B52432B5E000381B52 /* DDBubbleScene.swift in Sources */,
 				B42F67BC2425C1DD00AAE9EF /* SceneDelegate.swift in Sources */,
-				B4287D4824286F5000CF72A8 /* DDColourBubble.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

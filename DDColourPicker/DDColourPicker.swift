@@ -33,6 +33,7 @@
 //    SOFTWARE.
 
 import UIKit
+import SpriteKit
 
 protocol DDColourPickerDelegate: class {
     
@@ -95,7 +96,8 @@ protocol DDColourPickerDataSource: class {
 }
 
 
-class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
+
+class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleSceneDelegate {
     
     // static constants
     static let HeaderInset:CGFloat = 15                             // Inset from the edges of the scroll view to begin the header sections
@@ -112,19 +114,21 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
     private var numColoursForCurrentSection:Int = 0                 // number of colours to present for the current section
     private var circleDiameter:CGFloat = 5                          // diameter of circles that will be presented
     private var currentSection = 0                                  // the current section that the colour picker is displaying options for
-    private var selectedCircles:[DDColourBubble] = []               // the currently selected colour/circle for each section
-    private var selectableCircles:[DDColourBubble] = []             // the colours/circles which can be selected for the current section
     private var headerSections:[DDColourPickerHeaderSection] = []   // the header section views for each section in the top header
     private var headerView:UIScrollView!                            // the scroll view which contains the the header content view
     private var headerContentView:UIView!                           // the content view which contains the indvidual section headers that is then placed in the scroll view
     private var headerSelectionRing:UIView!                         // the ring that goes around the circle for the current section colour
     private var initialSetup:Bool = false                           // whether the view has been setup
     
-    var BPAnimator: UIDynamicAnimator!
-    var BPCollision: UICollisionBehavior!
-    var BPGravity: UIFieldBehavior!
-    var BPDynamics: UIDynamicItemBehavior!
-    var gravPos: CGPoint!
+    private var bubbleView: DDBubbleView! {                         // the bubble view which contains the spritekit scene
+        didSet {
+            bubbleScene.bubbleSceneDelegate = self
+        }
+    }
+    
+    private var bubbleScene: DDBubbleScene {                        // the SpriteKit scene which contains all the bubbles for the current section
+        return bubbleView.bubbleScene
+    }
     
     
     override func layoutSubviews() {
@@ -133,22 +137,11 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
     }
     
     
-    /// setup
-    ///
     /// Sets up the view with the appropriate header view and the colours ready to be selected
     /// for the current section
     ///
     private func setup() {
         if !initialSetup {
-            
-            BPAnimator = UIDynamicAnimator(referenceView: self)
-//            BPAnimator.setValue(true, forKey: "debugEnabled") // Private API. See the bridging header.
-            
-            BPGravity = UIFieldBehavior.radialGravityField(position: self.center)
-            BPGravity.falloff = 0.3
-            BPGravity.strength = 3
-            BPGravity.animationSpeed = 7
-            gravPos = self.center
             
             // clear the current layout
             for view in self.subviews {
@@ -162,29 +155,15 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
 
             // construct the subviews
             constructHeader()
-            constructSection(sectionIndex: currentSection, animated: true)
-            
-            
-            
-            BPDynamics = UIDynamicItemBehavior(items: self.selectableCircles);
-            BPDynamics.allowsRotation = false;
-            BPDynamics.resistance = 0.8
-
-            BPCollision = UICollisionBehavior(items: self.selectableCircles)
-            BPCollision.setTranslatesReferenceBoundsIntoBoundary(with: UIEdgeInsets(top: 0, left: -500, bottom: 0, right: -500))
-            BPCollision.collisionMode = .everything
-
-            BPAnimator.addBehavior(BPDynamics)
-            BPAnimator.addBehavior(BPGravity)
-            BPAnimator.addBehavior(BPCollision)
+            self.bubbleView = DDBubbleView(frame: CGRect(x: 0, y: self.headerView.frame.maxY, width: self.frame.width, height: self.frame.height - self.headerView.frame.maxY))
+            self.addSubview(bubbleView)
+            constructSection(sectionIndex: currentSection)
             
             initialSetup = true
         }
     }
-    
 
-    /// constructHeader
-    ///
+
     /// Constructs the header view and adds it to the view. If the header has more sections than
     /// can fit on the screen then it will be scrollable. Sets the current section header to the
     /// currently selected section. Also fetches the currently selected colours for all the sections.
@@ -219,14 +198,6 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
             headerSections += [sectionView]
             headerContentView.addSubview(sectionView)
             
-            // create the circle for the currently selected view so that we can later add it to the view when/if it becomes deselected
-            let circle = DDColourBubble(colour: sectionSelectedColour, diameter: circleDiameter)
-            circle.center = self.center
-            circle.alpha = 0
-            circle.transform = CGAffineTransform(scaleX: 0, y: 0)
-            circle.addTarget(self, action: #selector(self.didPressCircle(sender:)), for: .touchUpInside)
-            selectedCircles += [circle]
-            
             xPos += (i == numSections - 1) ? sectionWidth + DDColourPicker.HeaderInset : sectionWidth + DDColourPicker.InterSectionHeaderSpacing
         }
         
@@ -258,161 +229,54 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate {
     }
     
     
-    /// constructSection
-    ///
-    /// Constructs the circle colours that are selectable for the current section and animates their
-    /// presentation.
+    /// Constructs the current section and adds the bubbles to the view based on the colours we are presenting for the current section
+    /// and animates them in given the provided direction
     ///
     /// - Parameters:
-    ///   - sectionIndex: the section for which colours to present
-    ///   - animated: whether the presentation should be animated
-    ///
-    private func constructSection(sectionIndex:Int, animated:Bool) {
-        // get number of circles for the current section
+    ///   - sectionIndex: the section which is being set up
+    ///   - animationDirection: the direction towards which to animate the new bubbles in
+    private func constructSection(sectionIndex:Int, animationDirection:DDBubbleAnimationDirection = .All) {
         numColoursForCurrentSection = dataSource?.colourPicker(self, numberOfColoursInSection: sectionIndex) ?? 0
         
         // construct the circles for the current section
-        var newCircles:[DDColourBubble] = []
+        var bubbles:[DDBubbleNode] = []
         for i in 0 ..< numColoursForCurrentSection {
             let bubbleColour = dataSource?.colourPicker(self, colourForIndexPath: IndexPath(item: i, section: sectionIndex)) ?? UIColor.blue
-            let circle = DDColourBubble(colour: bubbleColour, diameter: circleDiameter)
-            circle.center = CGPoint(x: self.frame.width * CGFloat.random(in: 0...1), y: self.frame.height * CGFloat.random(in: 0...1))
-            circle.tag = i
-            circle.alpha = animated ? 0 : 1
-            circle.transform = animated ? CGAffineTransform(scaleX: 0, y: 0) : CGAffineTransform.identity
-            circle.addTarget(self, action: #selector(self.didPressCircle(sender:)), for: .touchUpInside)
-
-            // TOOO: need to add phsysics properties to the view and setup the location of the view properly
-            BPGravity.addItem(circle)
-            
-            newCircles += [circle]
+            let bubble = DDBubbleNode(colour: bubbleColour, radius: self.circleDiameter/2)
+            if bubbleColour == dataSource?.colourPicker(self, defaultSelectedColourForSection: self.currentSection) ?? UIColor.blue {
+                bubble.isSelected = true
+            }
+            bubbles.append(bubble)
         }
-        
-        
-        if animated {
-            // add new views as subviews
-            for circle in newCircles {
-                self.addSubview(circle)
-            }
-            
-            // animate them popping in and old views popping out
-            let animateInAnimation = {
-                UIView.animate(withDuration: 0.25, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.1, options: [.beginFromCurrentState, .curveEaseInOut], animations: {() in
-                    for circle in newCircles {
-                        circle.alpha = 1
-                        circle.transform = CGAffineTransform.identity
-                    }
-                }, completion: {(success:Bool) in
-                    for circle in self.selectableCircles {
-                        circle.removeFromSuperview()
-                    }
-                    self.selectableCircles = newCircles
-                })
-            }
-            
-            if self.selectableCircles.count > 0 {
-                UIView.animate(withDuration: 0.25, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.1, options: [.beginFromCurrentState, .curveEaseInOut], animations: {() in
-                    for circle in self.selectableCircles {
-                        circle.transform = CGAffineTransform(scaleX: 0, y: 0)
-                    }
-                }, completion: {(success:Bool) in
-                    animateInAnimation()
-                })
-            } else {
-                animateInAnimation()
-            }
-        } else {
-            
-            // remove old views
-            for circle in self.selectableCircles {
-                circle.removeFromSuperview()
-            }
-            
-            // add new views
-            for circle in newCircles {
-                self.addSubview(circle)
-            }
-            
-            self.selectableCircles = newCircles
-        }
-    }
-    
-    
-    /// didPressCircle
-    ///
-    /// Callback when a circle is pressed which swaps the currently selected colour with the colour of the tapped circle
-    ///
-    /// - Parameter sender: the view which triggered the action
-    ///
-    @objc func didPressCircle(sender:DDColourBubble) {
-        let snapPt = headerSections[currentSection].convert(headerSections[currentSection].getDotPoint(), to: self)
-        headerSections[currentSection].fadeDotOut()
-        
-        // swap circles in selectable to selected
-        selectColour(selected: sender)
-        
-        // animate one view up
-        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.1, options: [.beginFromCurrentState, .curveEaseInOut], animations: {() in
-            sender.center = snapPt
-            for view in self.selectableCircles {
-                view.alpha = 1
-                view.transform = CGAffineTransform(scaleX: 1, y: 1)
-            }
-        }, completion: {(success:Bool) in
-            self.headerSections[self.currentSection].replaceColour(colour: sender.backgroundColor ?? UIColor.blue)
-            for view in self.selectedCircles {
-                view.alpha = 0
-                view.transform = CGAffineTransform(scaleX: 0, y: 0)
-                view.removeFromSuperview()
-            }
-        })
-    }
-    
-    
-    /// selectColour
-    ///
-    /// Selects the colour/circle that is provided and swaps it with the currently selected colour for the current section
-    /// and also notifies the delegate of the change
-    ///
-    /// - Parameter selected: the selected colour view
-    ///
-    private func selectColour(selected:DDColourBubble) {
-        // swap circles in selectable to selected
-        let previouslySelectedColour = selectedCircles[currentSection]
-        previouslySelectedColour.tag = selected.tag
-        selectedCircles[currentSection] = selected
-        selectableCircles.remove(at: selected.tag)
-        selectableCircles.insert(previouslySelectedColour, at: previouslySelectedColour.tag)
-        previouslySelectedColour.center = CGPoint(x: self.frame.width * CGFloat.random(in: 0...1), y: self.frame.height * CGFloat.random(in: 0...1))
-        self.addSubview(previouslySelectedColour)
-        
-        BPGravity.removeItem(selected)
-        BPGravity.addItem(previouslySelectedColour)
-
-        delegate?.colourPicker(self, didSelectColour: selected.backgroundColor!, forSection: currentSection)
+        bubbleScene.animateBubblesIn(bubbles: bubbles, direction: animationDirection, shouldFade: !initialSetup)
     }
     
     
     // MARK: - DDColourPickerHeaderSectionDelegate
     
-    
-    
-    /// didPressHeaderSection
-    ///
-    /// callback for when a section header is selected and so that the current section is switched to
+
+    /// Callback for when a section header is selected and so that the current section is switched to
     /// also triggers reloading the colours for the next section
     ///
     /// - Parameter section: the section that was tapped triggering this action
     ///
     func didPressHeaderSection(section: DDColourPickerHeaderSection) {
+        guard currentSection != section.tag else { return }
         headerSections[currentSection].isSelected = false
         headerView.scrollRectToVisible(section.frame, animated: true)
+        let direction = currentSection < section.tag ? DDBubbleAnimationDirection.Left : DDBubbleAnimationDirection.Right
         currentSection = section.tag
         headerSections[currentSection].isSelected = true
         UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.1, options: [.beginFromCurrentState], animations: {() in
             self.headerSelectionRing.center = section.convert(section.getDotPoint(), to: self.headerContentView)
         }, completion: nil)
-        constructSection(sectionIndex: currentSection, animated: true)
+        constructSection(sectionIndex: currentSection, animationDirection: direction)
     }
     
+    
+    func bubbleScene(_ scene: DDBubbleScene, didSelect bubble: DDBubbleNode) {
+        print("didSelect -> \(bubble)")
+        delegate?.colourPicker(self, didSelectColour: bubble.fillColor, forSection: currentSection)
+        self.headerSections[self.currentSection].replaceColour(colour: bubble.fillColor)
+    }
 }
