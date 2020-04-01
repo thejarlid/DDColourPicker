@@ -88,10 +88,7 @@ class DDColourPickerHeaderSection: UIView {
     }
     
     
-    /// setup
-    ///
     /// Sets up the subviews and lays them out in the appropriate position on screen
-    ///
     func setup() {
         if !initialSetup {
             
@@ -126,32 +123,26 @@ class DDColourPickerHeaderSection: UIView {
     
     
     
-    /// pressedButton
-    ///
+
     /// Callback when the user taps the button for this view and notifies the delegate that
     /// the action occured
     ///
     /// - Parameter sender: the button which triggered the action
-    ///
     @objc func pressedButton(sender: UIButton) {
         self.delegate?.didPressHeaderSection(section: self)
     }
     
     
     
-    /// getDotPoint
-    ///
+
     /// getter method for the center point of where the circle lies on the section header
-    ///
     func getDotPoint() -> CGPoint {
         return self.colourPoint
     }
     
     
-    /// fadeDotOut
-    ///
+
     /// fades the circle currently presented out
-    ///
     func fadeDotOut() {
         UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.1, options: [.beginFromCurrentState, .curveEaseInOut], animations: {() in
             self.colourDot.transform = CGAffineTransform(scaleX: 0, y: 0)
@@ -162,12 +153,9 @@ class DDColourPickerHeaderSection: UIView {
     }
     
     
-    /// replaceColour
-    ///
     /// replaces the colour of the circle in the view and makes its alpha 1
     ///
     /// - Parameter colour: the colour for which to change the circle to
-    ///
     func replaceColour(colour:UIColor) {
         self.colourDot.backgroundColor = colour
         self.colourDot.alpha = 1
