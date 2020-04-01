@@ -33,6 +33,12 @@ class DDBubbleScene: SKScene {
         return field
     }()
     
+    lazy var vortex:SKFieldNode = {
+        let field = SKFieldNode.vortexField()
+        self.addChild(field)
+        return field
+    }()
+    
     override var size: CGSize {                             // property observer for the size field to call the setup method upon setting it
         didSet {
             setup()
@@ -78,6 +84,11 @@ class DDBubbleScene: SKScene {
         gravity.strength = strength
         gravity.position = CGPoint(x: size.width / 2, y: size.height / 2)
         gravity.speed = 5
+        
+        vortex.region = SKRegion(radius: radius)
+        vortex.minimumRadius = radius
+        vortex.strength = 0.0005
+        vortex.position = CGPoint(x: size.width / 2, y: size.height / 2)
     }
     
     

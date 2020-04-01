@@ -31,6 +31,7 @@ class DDBubbleView: SKView {
     private func setup() {
         _ = bubbleScene
         self.backgroundColor = UIColor.clear
+        self.showsFields = true
     }
     
     override func layoutSubviews() {
