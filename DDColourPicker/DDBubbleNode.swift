@@ -8,9 +8,12 @@
 
 import SpriteKit
 
+
+/// The bubble node for which we present in the bubble scene that have a circle body
+/// and expands when selected and shrinks when not
 class DDBubbleNode: SKShapeNode {
     
-    open var isSelected: Bool = false {
+    open var isSelected: Bool = false {                     // whether the currently selected bubble is selected, the observer calls the shrink and expand methods appropriately
         didSet {
             guard isSelected != oldValue else { return }
             if isSelected {
@@ -43,11 +46,13 @@ class DDBubbleNode: SKShapeNode {
     }
     
     
+    /// Expands the current node
     open func expand() {
         run(.scale(to: 1.75, duration: 0.2))
     }
     
     
+    /// Shrinks the current node
     open func shrink() {
         run(.scale(to: 1, duration: 0.2))
     }

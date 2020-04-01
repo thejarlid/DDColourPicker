@@ -96,6 +96,7 @@ protocol DDColourPickerDataSource: class {
 }
 
 
+
 class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleSceneDelegate {
     
     // static constants
@@ -119,13 +120,13 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
     private var headerSelectionRing:UIView!                         // the ring that goes around the circle for the current section colour
     private var initialSetup:Bool = false                           // whether the view has been setup
     
-    var bubbleView: DDBubbleView! {
+    private var bubbleView: DDBubbleView! {                         // the bubble view which contains the spritekit scene
         didSet {
             bubbleScene.bubbleSceneDelegate = self
         }
     }
     
-    var bubbleScene: DDBubbleScene {
+    private var bubbleScene: DDBubbleScene {                        // the SpriteKit scene which contains all the bubbles for the current section
         return bubbleView.bubbleScene
     }
     
@@ -136,8 +137,6 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
     }
     
     
-    /// setup
-    ///
     /// Sets up the view with the appropriate header view and the colours ready to be selected
     /// for the current section
     ///
@@ -163,10 +162,8 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
             initialSetup = true
         }
     }
-    
 
-    /// constructHeader
-    ///
+
     /// Constructs the header view and adds it to the view. If the header has more sections than
     /// can fit on the screen then it will be scrollable. Sets the current section header to the
     /// currently selected section. Also fetches the currently selected colours for all the sections.
@@ -232,6 +229,12 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
     }
     
     
+    /// Constructs the current section and adds the bubbles to the view based on the colours we are presenting for the current section
+    /// and animates them in given the provided direction
+    ///
+    /// - Parameters:
+    ///   - sectionIndex: the section which is being set up
+    ///   - animationDirection: the direction towards which to animate the new bubbles in
     private func constructSection(sectionIndex:Int, animationDirection:DDBubbleAnimationDirection = .All) {
         numColoursForCurrentSection = dataSource?.colourPicker(self, numberOfColoursInSection: sectionIndex) ?? 0
         
@@ -247,49 +250,12 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
         }
         bubbleScene.animateBubblesIn(bubbles: bubbles, direction: animationDirection, shouldFade: !initialSetup)
     }
-
-    
-//    @IBAction func reset(_ sender: UIControl?) {
-//        let speed = magnetic.physicsWorld.speed
-//        magnetic.physicsWorld.speed = 0
-//        let sortedNodes = magnetic.children.compactMap { $0 as? Node }.sorted { node, nextNode in
-//            let distance = node.position.distance(from: magnetic.magneticField.position)
-//            let nextDistance = nextNode.position.distance(from: magnetic.magneticField.position)
-//            return distance < nextDistance && node.isSelected
-//        }
-//        var actions = [SKAction]()
-//        for (index, node) in sortedNodes.enumerated() {
-//            node.physicsBody = nil
-//            let action = SKAction.run { [unowned magnetic, unowned node] in
-//                if node.isSelected {
-//                    let point = CGPoint(x: magnetic.size.width / 2, y: magnetic.size.height + 40)
-//                    let movingXAction = SKAction.moveTo(x: point.x, duration: 0.2)
-//                    let movingYAction = SKAction.moveTo(y: point.y, duration: 0.4)
-//                    let resize = SKAction.scale(to: 0.3, duration: 0.4)
-//                    let throwAction = SKAction.group([movingXAction, movingYAction, resize])
-//                    node.run(throwAction) { [unowned node] in
-//                        node.removeFromParent()
-//                    }
-//                } else {
-//                    node.removeFromParent()
-//                }
-//            }
-//            actions.append(action)
-//            let delay = SKAction.wait(forDuration: TimeInterval(index) * 0.002)
-//            actions.append(delay)
-//        }
-//        magnetic.run(.sequence(actions)) { [unowned magnetic] in
-//            magnetic.physicsWorld.speed = speed
-//        }
-//    }
     
     
     // MARK: - DDColourPickerHeaderSectionDelegate
     
-    
-    /// didPressHeaderSection
-    ///
-    /// callback for when a section header is selected and so that the current section is switched to
+
+    /// Callback for when a section header is selected and so that the current section is switched to
     /// also triggers reloading the colours for the next section
     ///
     /// - Parameter section: the section that was tapped triggering this action

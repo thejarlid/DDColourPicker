@@ -8,33 +8,39 @@
 
 import SpriteKit
 
-@objc
-protocol DDBubbleSceneDelegate: class {
+/// Interface for the DDBubbleSceneDelegate for which to notify about events
+/// such as the selection of a bubble
+@objc protocol DDBubbleSceneDelegate: class {
     func bubbleScene(_ scene: DDBubbleScene, didSelect bubble:DDBubbleNode)
 }
 
+
+/// Direction of which to animate the incoming bubbles towards
 enum DDBubbleAnimationDirection {
     case Left
     case Right
     case All
 }
 
+
+/// The SKScene representing the gravity field that the bubbles are
+/// added to and float around within
 class DDBubbleScene: SKScene {
     
-    lazy var gravity:SKFieldNode = {
+    lazy var gravity:SKFieldNode = {                        // the gravity field that attracts the bubble
         let field = SKFieldNode.radialGravityField()
         self.addChild(field)
         return field
     }()
     
-    override var size: CGSize {
+    override var size: CGSize {                             // property observer for the size field to call the setup method upon setting it
         didSet {
             setup()
         }
     }
     
-    weak var bubbleSceneDelegate:DDBubbleSceneDelegate?
-    private var selectedBubble:DDBubbleNode?
+    weak var bubbleSceneDelegate:DDBubbleSceneDelegate?     // the delegate for which to notify of events
+    private var selectedBubble:DDBubbleNode?                // the currently selected bubble
     
     
     override init(size: CGSize) {
@@ -49,6 +55,9 @@ class DDBubbleScene: SKScene {
     }
     
     
+    
+    /// Sets up the gravity and physics properties for the
+    /// current scene
     private func setup() {
         backgroundColor = .clear
         scaleMode = .aspectFill
@@ -72,6 +81,10 @@ class DDBubbleScene: SKScene {
     }
     
     
+    /// adds a child bubble at a random position to the left or right of the scene
+    /// and lets the gravity then pull it in
+    ///
+    /// - Parameter node: the node to which add to the current scene
     override func addChild(_ node: SKNode) {
         let isLeft = Bool.random()
         let xPos = isLeft ? -node.frame.width : frame.width + node.frame.width
@@ -81,8 +94,16 @@ class DDBubbleScene: SKScene {
     }
     
     
+    /// Animates the current set of bubbles on the screen if they exist off in the direction provided
+    /// and adds the incoming nodes on the opposite side to the scene so that gravity can then pull them in
+    ///
+    /// - Parameters:
+    ///   - bubbles: the bubbles for which to add to the scene
+    ///   - direction: the direction in which to animate the new bubbles towards and clear the existing bubbles from
+    ///   - shouldFade: whether the incoming bubbles should fade in
     func animateBubblesIn(bubbles:[DDBubbleNode], direction:DDBubbleAnimationDirection, shouldFade:Bool) {
         
+        // remove the old bubbles on the screen
         let _ = children.compactMap {
             guard let bubble = $0 as? DDBubbleNode else { return }
             var exitXPos:CGFloat = 0
@@ -99,13 +120,24 @@ class DDBubbleScene: SKScene {
                 bubble.removeFromParent()
             })
         }
+        self.selectedBubble = nil
         
+        // add the new incoming bubbles in
         let _ = bubbles.compactMap {
             let bubble = $0
+            
+            // set up initial scale and alpha if fading in
             if shouldFade {
                 bubble.alpha = 0
                 bubble.setScale(0.3)
             }
+            
+            // if the current bubble is selected the scene's currently selected bubble needs to be set
+            if bubble.isSelected {
+                self.selectedBubble = bubble
+            }
+            
+            // pick a random position on the side for which we are adding the bubbles to
             var entryXPos:CGFloat = 0
             if direction == .All {
                 entryXPos = Bool.random() ? -bubble.frame.width : self.frame.width + bubble.frame.width
@@ -116,6 +148,7 @@ class DDBubbleScene: SKScene {
             bubble.position = CGPoint(x: entryXPos, y: yPos)
             super.addChild(bubble)
             
+            // animate the fade in if we are doing it
             if shouldFade {
                 let actions = [SKAction.fadeIn(withDuration: 0.7),
                                SKAction.scale(to: 1, duration: 0.7)]
@@ -126,6 +159,11 @@ class DDBubbleScene: SKScene {
     }
     
     
+    
+    /// Gets the bubble touched at a given point
+    ///
+    /// - Parameter point: the point for which to get bubbles at
+    /// - Returns: a bubble if one exists
     private func bubble(at point: CGPoint) -> DDBubbleNode? {
         // get all the nodes that intersect at a given point
         // and for each check if their path contains the point
@@ -138,6 +176,13 @@ class DDBubbleScene: SKScene {
     }
     
     
+    
+    /// handler for when touches end so that we can perform actions when the user taps on the screen and
+    /// select a bubble if tapped on one
+    ///
+    /// - Parameters:
+    ///   - touches: the touches which eneded
+    ///   - event: the event which occured
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)

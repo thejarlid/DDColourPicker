@@ -8,9 +8,11 @@
 
 import SpriteKit
 
+
+/// The SKView which presents the bubble scene
 class DDBubbleView: SKView {
     
-    public lazy var bubbleScene: DDBubbleScene = {
+    public lazy var bubbleScene: DDBubbleScene = {              // the bubble scene that is on this view
         let scene = DDBubbleScene(size: self.bounds.size)
         self.presentScene(scene)
         return scene
