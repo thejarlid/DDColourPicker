@@ -53,7 +53,7 @@ class DDBubbleScene: SKScene {
         backgroundColor = .clear
         scaleMode = .aspectFill
         
-        let strength = Float(max(size.width, size.height))
+        let strength = Float(max(size.width, size.height)) * 100
         let radius = strength.squareRoot() * 100
         
         physicsWorld.gravity = CGVector(dx: 0, dy: 0)
@@ -68,6 +68,7 @@ class DDBubbleScene: SKScene {
         gravity.minimumRadius = radius
         gravity.strength = strength
         gravity.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        gravity.speed = 5
     }
     
     
@@ -80,7 +81,7 @@ class DDBubbleScene: SKScene {
     }
     
     
-    func animateBubblesIn(bubbles:[DDBubbleNode], direction:DDBubbleAnimationDirection) {
+    func animateBubblesIn(bubbles:[DDBubbleNode], direction:DDBubbleAnimationDirection, shouldFade:Bool) {
         
         let _ = children.compactMap {
             guard let bubble = $0 as? DDBubbleNode else { return }
@@ -90,13 +91,21 @@ class DDBubbleScene: SKScene {
             } else {
                 exitXPos = direction == .Left ? -bubble.frame.width : self.frame.width + bubble.frame.width
             }
-            bubble.run(.move(to: CGPoint(x: exitXPos, y: bubble.position.y), duration: 0.4), completion: {() in
+            let actions = [SKAction.move(to: CGPoint(x: exitXPos, y: bubble.position.y), duration: 0.5),
+                           SKAction.fadeOut(withDuration: 0.5),
+                           SKAction.scale(to: 0.3, duration: 0.5)]
+            let groupAction = SKAction.group(actions)
+            bubble.run(groupAction, completion: {() in
                 bubble.removeFromParent()
             })
         }
         
         let _ = bubbles.compactMap {
             let bubble = $0
+            if shouldFade {
+                bubble.alpha = 0
+                bubble.setScale(0.3)
+            }
             var entryXPos:CGFloat = 0
             if direction == .All {
                 entryXPos = Bool.random() ? -bubble.frame.width : self.frame.width + bubble.frame.width
@@ -106,6 +115,13 @@ class DDBubbleScene: SKScene {
             let yPos = CGFloat.random(bubble.frame.height, self.frame.height - bubble.frame.height)
             bubble.position = CGPoint(x: entryXPos, y: yPos)
             super.addChild(bubble)
+            
+            if shouldFade {
+                let actions = [SKAction.fadeIn(withDuration: 0.7),
+                               SKAction.scale(to: 1, duration: 0.7)]
+                let groupAction = SKAction.group(actions)
+                bubble.run(groupAction)
+            }
         }
     }
     

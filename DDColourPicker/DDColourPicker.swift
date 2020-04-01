@@ -245,7 +245,7 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
             }
             bubbles.append(bubble)
         }
-        bubbleScene.animateBubblesIn(bubbles: bubbles, direction: animationDirection)
+        bubbleScene.animateBubblesIn(bubbles: bubbles, direction: animationDirection, shouldFade: !initialSetup)
     }
 
     

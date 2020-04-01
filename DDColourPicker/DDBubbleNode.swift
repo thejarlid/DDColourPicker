@@ -14,9 +14,9 @@ class DDBubbleNode: SKShapeNode {
         didSet {
             guard isSelected != oldValue else { return }
             if isSelected {
-                selectedAnimation()
+                expand()
             } else {
-                deselectedAnimation()
+                shrink()
             }
         }
     }
@@ -32,7 +32,7 @@ class DDBubbleNode: SKShapeNode {
             let body = SKPhysicsBody(polygonFrom: path.copy(using: &transform)!)
             body.allowsRotation = false
             body.friction = 0
-            body.linearDamping = 3
+            body.linearDamping = 1.5
             return body
         }()
     }
@@ -43,18 +43,12 @@ class DDBubbleNode: SKShapeNode {
     }
     
     
-    /**
-     The animation to execute when the node is selected.
-     */
-    open func selectedAnimation() {
+    open func expand() {
         run(.scale(to: 1.75, duration: 0.2))
     }
     
     
-    /**
-     The animation to execute when the node is deselected.
-     */
-    open func deselectedAnimation() {
+    open func shrink() {
         run(.scale(to: 1, duration: 0.2))
     }
     
