@@ -141,7 +141,6 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
     
     /// Sets up the view with the appropriate header view and the colours ready to be selected
     /// for the current section
-    ///
     private func setup() {
         if !initialSetup {
             
@@ -169,7 +168,6 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
     /// Constructs the header view and adds it to the view. If the header has more sections than
     /// can fit on the screen then it will be scrollable. Sets the current section header to the
     /// currently selected section. Also fetches the currently selected colours for all the sections.
-    ///
     private func constructHeader() {
         // make the scroll view
         let headerHeight = max(self.frame.height * 0.15, circleDiameter + 20)
@@ -261,7 +259,6 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
     /// also triggers reloading the colours for the next section
     ///
     /// - Parameter section: the section that was tapped triggering this action
-    ///
     func didPressHeaderSection(section: DDColourPickerHeaderSection) {
         guard currentSection != section.tag else { return }
         headerSections[currentSection].isSelected = false
