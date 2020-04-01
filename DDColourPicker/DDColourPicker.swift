@@ -100,33 +100,35 @@ protocol DDColourPickerDataSource: class {
 class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleSceneDelegate {
     
     // static constants
-    static let HeaderInset:CGFloat = 15                             // Inset from the edges of the scroll view to begin the header sections
-    static let InterSectionHeaderSpacing:CGFloat = 10               // Spacing between the header sections
+    static let HeaderInset:CGFloat = 15                                 // Inset from the edges of the scroll view to begin the header sections
+    static let InterSectionHeaderSpacing:CGFloat = 10                   // Spacing between the header sections
     
     
     // optional user set fields
-    weak var delegate: DDColourPickerDelegate?                      // delegate for the colour picker to notify for events such as colour selection changes
-    weak var dataSource: DDColourPickerDataSource?                  // datasource for the colour picker to fetch information required to set this view up
+    weak var delegate: DDColourPickerDelegate?                          // delegate for the colour picker to notify for events such as colour selection changes
+    weak var dataSource: DDColourPickerDataSource?                      // datasource for the colour picker to fetch information required to set this view up
     
     
     // private fields
-    private var numSections:Int = 0                                 // the number of sections for the colour picker
-    private var numColoursForCurrentSection:Int = 0                 // number of colours to present for the current section
-    private var circleDiameter:CGFloat = 5                          // diameter of circles that will be presented
-    private var currentSection = 0                                  // the current section that the colour picker is displaying options for
-    private var headerSections:[DDColourPickerHeaderSection] = []   // the header section views for each section in the top header
-    private var headerView:UIScrollView!                            // the scroll view which contains the the header content view
-    private var headerContentView:UIView!                           // the content view which contains the indvidual section headers that is then placed in the scroll view
-    private var headerSelectionRing:UIView!                         // the ring that goes around the circle for the current section colour
-    private var initialSetup:Bool = false                           // whether the view has been setup
+    private var numSections:Int = 0                                     // the number of sections for the colour picker
+    private var numColoursForCurrentSection:Int = 0                     // number of colours to present for the current section
+    private var circleDiameter:CGFloat = 5                              // diameter of circles that will be presented
+    private var currentSection = 0                                      // the current section that the colour picker is displaying options for
+    private var headerSections:[DDColourPickerHeaderSection] = []       // the header section views for each section in the top header
+    private var headerView:UIScrollView!                                // the scroll view which contains the the header content view
+    private var headerContentView:UIView!                               // the content view which contains the indvidual section headers that is then placed in the scroll view
+    private var headerSelectionRing:UIView!                             // the ring that goes around the circle for the current section colour
+    private var initialSetup:Bool = false                               // whether the view has been setup
+    private let bubbleGen = UIImpactFeedbackGenerator(style: .medium)   // the generator which creates the haptic response on a bubble selection
+    private let headerGen = UISelectionFeedbackGenerator()              // the generator which creates the haptic response on a header selection
     
-    private var bubbleView: DDBubbleView! {                         // the bubble view which contains the spritekit scene
+    private var bubbleView: DDBubbleView! {                             // the bubble view which contains the spritekit scene
         didSet {
             bubbleScene.bubbleSceneDelegate = self
         }
     }
     
-    private var bubbleScene: DDBubbleScene {                        // the SpriteKit scene which contains all the bubbles for the current section
+    private var bubbleScene: DDBubbleScene {                            // the SpriteKit scene which contains all the bubbles for the current section
         return bubbleView.bubbleScene
     }
     
@@ -271,12 +273,20 @@ class DDColourPicker: UIView, DDColourPickerHeaderSectionDelegate, DDBubbleScene
             self.headerSelectionRing.center = section.convert(section.getDotPoint(), to: self.headerContentView)
         }, completion: nil)
         constructSection(sectionIndex: currentSection, animationDirection: direction)
+        headerGen.selectionChanged()
     }
     
     
+    /// Callback when a bubble is selected, we change the header selected bubble with the selected
+    /// bubble colour
+    ///
+    /// - Parameters:
+    ///   - scene: the scene in which a bubble is selected
+    ///   - bubble: the bubble which was selected
     func bubbleScene(_ scene: DDBubbleScene, didSelect bubble: DDBubbleNode) {
         print("didSelect -> \(bubble)")
         delegate?.colourPicker(self, didSelectColour: bubble.fillColor, forSection: currentSection)
         self.headerSections[self.currentSection].replaceColour(colour: bubble.fillColor)
+        bubbleGen.impactOccurred()
     }
 }
